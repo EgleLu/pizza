@@ -8,6 +8,8 @@ import {QuantityInput} from './QuantityInput';
 import {useQuantity} from "../Hooks/useQuantity";
 import {Toppings} from './Toppings';
 import {useToppings} from "../Hooks/useToppings";
+import {useChoice} from '../Hooks/useChoice';
+import {Choices} from './Choices'
 
 const Dialog = styled.div`
     width: 500px;
@@ -69,6 +71,12 @@ export const ConfirmButton = styled(Title)`
     witdh: 200px;
     cursor: pointer;
     background-color: ${pizzaRed};
+    ${({disabled}) => disabled &&
+    `opacity: .5;
+    background-color: grey;
+    pointer-events: none;
+    `
+}
 `
 const pricePerTopping = 0.5;
 export function getPrice(order){
@@ -81,6 +89,7 @@ function hasToppings(food){
  function FoodDialogContainer({openFood, setOpenFood, setOrders, orders }){
      const quantity = useQuantity(openFood && openFood.quantity);
      const toppings = useToppings(openFood.toppings);
+     const choiceRadio = useChoice(openFood.choice);
 
     function close(){
         setOpenFood();
@@ -90,7 +99,8 @@ function hasToppings(food){
     const order = {
         ...openFood,
         quantity: quantity.value,
-        toppings: toppings.toppings
+        toppings: toppings.toppings,
+        choice: choiceRadio.value
     }
     function addToOrder(){
         setOrders([...orders, order])
@@ -110,9 +120,13 @@ function hasToppings(food){
                     <h3>Would you like toppings?</h3>
                     <Toppings {...toppings} />
                     </>}
+                    {openFood.choices && (
+                        <Choices openFood={openFood} choiceRadio={choiceRadio} />
+                    )}
                 </DialogContent>
                 <DialogFooter>
-                    <ConfirmButton onClick={addToOrder}>Add to order: {formatPrice(getPrice(order))}</ConfirmButton>
+                    <ConfirmButton onClick={addToOrder} disabled={openFood.choices && !choiceRadio.value}>
+                        Add to order: {formatPrice(getPrice(order))}</ConfirmButton>
                 </DialogFooter>
             </Dialog>
             </>
